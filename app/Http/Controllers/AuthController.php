@@ -55,14 +55,10 @@ class AuthController extends Controller
             $validateUser = Validator::make(
                 $request->all(),
                 [
-                    'businessName'  =>  'required',
                     'email'         =>  'required|email|unique:users,email',
                     'password'      =>  'required',
-                    'country'       =>  'required',
-                    'firstName'     =>  'required',
-                    'lastName'      =>  'required',
-                    'phoneNumber'   =>  'required',
-                    'businessType'  =>  'required',
+                    'name'          =>  'required',
+                    'username'      =>  'required'
                 ]
             );
 
@@ -75,16 +71,12 @@ class AuthController extends Controller
             }
 
             $user = User::create([
-                "businessName"  =>  $request->businessName,
-                "businessType"  =>  $request->businessType,
-                "country"       =>  $request->country,
-                "firstName"     =>  $request->firstName,
-                "lastName"      =>  $request->lastName,
-                "email"         =>  $request->email,
-                "phoneNumber"   =>  $request->phoneNumber,
-                "password"      =>  Hash::make($request->password)
+                "name"     =>  $request->name,
+                "email"    =>  $request->email,
+                "username" =>  $request->username,
+                "password" =>  Hash::make($request->password)
             ]);
-            $apiToken = $user->createToken("API TOKEN")->plainTextToken;
+            $apiToken = $user->createToken("API_TOKEN")->plainTextToken;
             $user->api_token = $apiToken;
             $user->save();
             $this->sendMail($user->toArray());

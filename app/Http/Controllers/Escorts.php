@@ -12,8 +12,11 @@ class Escorts extends Controller
         try {
             $kinks = User::whenHas('tags', function ($query) use ($request) {
                 $query->whereJsonContains('tags', $request->tags);
-            })->whenHas('fees', function ($query) {
-                $query->whereBetween('amount', [1000, 5000]);
+            })->whenHas('fees', function ($query) use ($request) {
+                $fee = explode('-', $request->fees);
+                $query->whereBetween('amount', [$fee[0], $fee[1]]);
+            })->whenHas('location', function($query) use ($request) {
+                $query->where('location', $request->location);
             })->where('is_escort', true)->inRandomOrder()->get();
         
             return get_success_response($kinks);
