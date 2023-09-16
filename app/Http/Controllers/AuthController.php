@@ -104,7 +104,7 @@ class AuthController extends Controller
         }
     }
 
-    public function updateProfile(Request $request)
+    public function update(Request $request)
     {
         if ($request->has('phone') && (NULL !== $request->phone)) {
             $_userData['phone']  = $request->phone;
@@ -243,5 +243,15 @@ class AuthController extends Controller
         return get_error_response(['errors' => [
             ['code' => 'not-found', 'message' => 'failed!']
         ]], 404);
+    }
+
+    public function profile(Request $request)
+    {
+        try {
+            $user = $request->user();
+            return get_success_response($user);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 }
