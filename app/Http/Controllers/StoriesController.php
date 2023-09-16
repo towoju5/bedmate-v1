@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Stories;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class StoriesController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        try {
+            // $stories = Stories::where('created_at', '<', )
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**

@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('username')->nullable();
+            $table->string('username');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('gender')->nullable();
             $table->string('sexual_preference')->nullable();
             $table->json('interested_in')->nullable();
@@ -27,9 +27,10 @@ return new class extends Migration
             $table->string('impression')->nullable();
             // filters
             $table->string('location')->nullable();
-            $table->string('tags')->nullables();
+            $table->string('tags')->nullable();
+            $table->string('api_token')->nullable();
             $table->enum('plans', ['freemium', 'standard', 'premium'])->default('freemium');
-            $table->json('');
+            $table->json('metadata')->nullable();
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
