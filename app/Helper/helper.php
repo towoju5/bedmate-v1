@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\ImageHelper;
 use App\Models\Settings;
 use App\Models\User;
 
@@ -20,10 +21,10 @@ if (!function_exists('save_image')) {
      * @param array $options
      *
      */
-    function save_image($amount, $percentage)
+    function save_image($image, $path)
     {
-        $commission = (($amount / 100) * $percentage);
-        return $commission;
+        $upload = ImageHelper::save_image($image, 'uploads');
+        return  $upload;
     }
 }
 
