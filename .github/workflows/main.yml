@@ -1,8 +1,8 @@
 on: 
   push:
     branches:
-      - main
-name: 🚀 Deploy website on push
+      - master
+name: 🚀 Deploy website on push - Bedmate
 jobs:
   web-deploy:
     name: 🎉 Deploy
@@ -21,4 +21,4 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /
+        server-dir: /public_html/
