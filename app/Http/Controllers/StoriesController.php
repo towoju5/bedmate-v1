@@ -13,9 +13,10 @@ class StoriesController extends Controller
     public function index()
     {
         try {
-            // $stories = Stories::where('created_at', '<', )
+            $stories = Stories::whereDate('created_at', '>=', now()->subHours(24))->get();
+            return get_success_response($stories);
         } catch (\Throwable $th) {
-            //throw $th;
+            return get_error_response(['error' =>  $th->getMessage()]);
         }
     }
 
@@ -24,23 +25,34 @@ class StoriesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $stories = new Stories();
+            $stories->type = $request->story_type;
+            $stories->content = $request->content;
+            if($request->has('image')) : 
+                $stories->image = $request->image;
+            endif;
+            $stories->save();
+
+            return get_success_response($stories);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' =>  $th->getMessage()]);
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource. 
      */
     public function show(string $id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+        try {
+            $story =  Stories::whereUserId(auth()->id())->whereId($id)->findorfail();
+            if($story)
+                return get_success_response(['message' => 'Record deleted successfully']);
+            return get_error_response(['error' =>  'Unable to delete, please contact support']);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' =>  $th->getMessage()]);
+        }
     }
 
     /**
@@ -48,6 +60,13 @@ class StoriesController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $gallery =  Stories::whereUserId(auth()->id())->whereId($id)->findorfail();
+            if($gallery->delete())
+                return get_success_response(['message' => 'Record deleted successfully']);
+            return get_error_response(['error' =>  'Unable to delete, please contact support']);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' =>  $th->getMessage()]);
+        }
     }
 }

@@ -37,7 +37,15 @@ class AuthController extends Controller
             if (null == $user->email_verified_at) {
                 return get_error_response(["message" => "Please verify your email to continue"], 401);
             }
-            $auth_token = explode('|', $user->api_token)[1];
+            $auth_token = $user->api_token;
+            if(empty($auth_token)) {
+                Auth::user()->tokens->each(function ($token, $key) {
+                    $token->delete();
+                });
+                $auth_token = Auth::user()->createToken('api-token');
+                $user->api_token = explode("|", $auth_token->plainTextToken);
+                $user->save();
+            }
             return response()->json([
                 'status'    => true,
                 'message'   => 'User Logged In Successfully',
@@ -106,14 +114,58 @@ class AuthController extends Controller
             $_userData['password'] = bcrypt($request->password);
         }
 
-        if ($request->hasFile('image') && (NULL !== $request->image)) {
-            $img = save_image('profile', $request->image);
-            $_userData['profile_image'] = url($img);
+        if($request->has("name") && !empty($request->name)) {
+            $_userData['name'] = $request->name;
         }
-
-        if ($request->has('two_fa') && (NULL !== $request->two_fa)) {
-            $_userData['twoFactor'] = boolval($request->two_fa);
+        
+        if($request->has("gender") && !empty($request->gender)) {
+            $_userData['gender'] = $request->gender;
         }
+        
+        if($request->has("sexual_preference") && !empty($request->sexual_preference)) {
+            $_userData['sexual_preference'] = $request->sexual_preference;
+        }
+        
+        if($request->has("interested_in") && !empty($request->interested_in)) {
+            $_userData['interested_in'] = $request->interested_in;
+        }
+        
+        if($request->has("kinks") && !empty($request->kinks)) {
+            $_userData['kinks'] = $request->kinks;
+        }
+        
+        if($request->has("bio") && !empty($request->bio)) {
+            $_userData['bio'] = $request->bio;
+        }
+        
+        if($request->has("is_escort") && !empty($request->is_escort)) {
+            $_userData['is_escort'] = $request->is_escort;
+        }
+        
+        if($request->has("impression") && !empty($request->impression)) {
+            $_userData['impression'] = $request->impression;
+        }
+        
+        if($request->has("location") && !empty($request->location)) {
+            $_userData['location'] = $request->location;
+        }
+        
+        if($request->has("tags") && !empty($request->tags)) {
+            $_userData['tags'] = $request->tags;
+        }
+        
+        if($request->has("api_token") && !empty($request->api_token)) {
+            $_userData['api_token'] = $request->api_token;
+        }
+        
+        if($request->has("plans") && !empty($request->plans)) {
+            $_userData['plans'] = $request->plans;
+        }
+        
+        if($request->has("metadata") && !empty($request->metadata)) {
+            $_userData['metadata'] = $request->metadata;
+        }
+        
 
         if (empty($_userData)) {
             return get_error_response(["error" => "No data was passed"]);

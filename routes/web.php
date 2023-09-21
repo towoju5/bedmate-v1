@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\Playground;
+use App\Http\Controllers\FileUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,8 +16,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    event(new Playground([
-        'message' => 'Hey babe'
-    ]));
-    // return view('welcome');
+    // event(new Playground([
+    //     'message' => 'Hey babe'
+    // ]));
+    return view('welcome');
 });
+
+Route::get('/upload', 'FileUploadController@showUploadForm');
+Route::post('/upload', [FileUploadController::class, 'upload']);
