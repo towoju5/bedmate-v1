@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\Escorts;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\MiscController;
+use App\Http\Controllers\StoriesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +25,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::any('compare', [MiscController::class, 'compare']);
+
 Route::group([], function() {
     Route::post('login',    [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
@@ -41,15 +45,22 @@ Route::group([], function() {
 
         Route::group(['prefix' => 'kinks'], function() {
             Route::get('/', [Escorts::class, 'kinks']);
-            Route::post('{customer-id}', [Escorts::class, 'kink']);
-            Route::delete('{customer-id}', [Escorts::class, 'destroy']);
+            Route::get('{customer_id}', [Escorts::class, 'kink']);
+            Route::delete('{customer_id}', [Escorts::class, 'destroy']);
         });
 
         Route::group(['prefix' => 'gallery'], function() {
             Route::get('/',             [GalleryController::class, 'index']);
-            Route::get('{media-id}',    [GalleryController::class, 'show']);
+            Route::get('{media_id}',    [GalleryController::class, 'show']);
             Route::post('save',         [GalleryController::class, 'store']);
-            Route::delete('{media-id}', [GalleryController::class, 'destroy']);
+            Route::delete('{media_id}', [GalleryController::class, 'destroy']);
+        });
+
+        Route::group(['prefix' => 'stories'], function() {
+            Route::get('/',                 [StoriesController::class, 'index']);
+            Route::get('{media_id}',   [StoriesController::class, 'show']);
+            Route::post('save',             [StoriesController::class, 'store']);
+            Route::delete('{media_id}',     [StoriesController::class, 'destroy']);
         });
     });
 });

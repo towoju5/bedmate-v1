@@ -13,4 +13,8 @@ class Stories extends Model
     protected $casts = [
         'hashtags' => 'array'
     ];
+
+    protected $hidden = [
+        'updated_at',
+    ];
 }

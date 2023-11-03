@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Mail\OtpVerificationMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Notifications\Registration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -46,11 +49,7 @@ class AuthController extends Controller
                 $user->api_token = explode("|", $auth_token->plainTextToken);
                 $user->save();
             }
-            return response()->json([
-                'status'    => true,
-                'message'   => 'User Logged In Successfully',
-                'token'     => $user->api_token
-            ], 200);
+            return get_success_response(['token' => $user->api_token]);
         } catch (\Throwable $th) {
             return get_error_response($th->getMessage(), 500);
         }
@@ -66,7 +65,7 @@ class AuthController extends Controller
                     'email'         =>  'required|email|unique:users,email',
                     'password'      =>  'required',
                     'name'          =>  'required',
-                    'username'      =>  'required'
+                    'username'      =>  'required|unique:users,username'
                 ]
             );
 
@@ -173,10 +172,7 @@ class AuthController extends Controller
 
         $query = ['id' => auth()->id()];
         if ($user = User::where($query)->update($_userData)) {
-            return response()->json([
-                'status' => true,
-                'code'   => http_response_code(),
-                'message' => "Profile information updated successfully",
+            return get_success_response([
                 'data'   => getUsers()
             ]);
         } else {
@@ -251,12 +247,7 @@ class AuthController extends Controller
             $user->is_pin_set = 1;
             $user->transaction_pin = bcrypt($incomingPin);
             if ($user->save()) {
-                return response()->json([
-                    'status' => true,
-                    'code'   => http_response_code(),
-                    'message' => "Transaction Pin updated successfully",
-                    'data'   => ["msg" => "Pin Updated successfully"]
-                ]);
+                return get_success_response(["msg" => "Pin Updated successfully"]);
             } else {
                 $err = "We're currenctly unable to update your transaction pin please try again later";
                 return response()->json(get_error_response($err));
@@ -277,11 +268,11 @@ class AuthController extends Controller
             ]);
             $msg  = [
                 'user'  =>  $customer['id'],
-                'name'  =>  $customer['firstName'],
+                'name'  =>  $customer['name'],
                 'title' =>  'Welcome to '.getenv('APP_NAME'),
                 'body'  =>  "Please use this code to complete your registration: $token"
             ];
-            $send = $user->notify(new Registration($msg));
+            $send = Mail::to($customer['email'])->send(new OtpVerificationMail($token, $user->name));
             return get_success_response(['message' => 'Please check your email for your verification code.'], 200);
         }
         return get_error_response(['errors' => [
@@ -296,6 +287,28 @@ class AuthController extends Controller
             return get_success_response($user);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
+
+    public function resetPassword(Request $request)  
+    {
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            // check if reset token exists
+            $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
+            if($tokenExists) {
+                $user = User::whereEmail($request->email)->first();
+                $user->password = bcrypt($request->password);
+                $user->save();
+            }
+            return redirect(route('login'));
+        } catch (\Throwable $th) {
+            return back()->with('error', $th->getMessage());
         }
     }
 }

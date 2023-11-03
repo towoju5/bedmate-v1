@@ -26,7 +26,20 @@ class GalleryController extends Controller
     public function store(Request $request)
     {
         try {
-            $gallery =  Gallery::whereUserId(auth()->id())->get();
+            $request->validate([
+                'media_type' => 'required|in:image,video',
+                'media_file' => 'required|file|mimes:jpeg,png,gif,mp4,mv4,mov,avi,heic,heif,jpg'
+            ]);
+            $userId = auth()->id();
+            $gallery =  new Gallery;
+            $gallery->mdeia_type = $request->media_type;
+            $gallery->user_id = $userId;
+            if($request->media_type == 'image'):
+                $gallery->media_url = save_image($request->file('media_file'), "gallery/".sha1($userId));
+            else :
+                $gallery->media_url = save_media($request->file('media_file'), "gallery/".sha1($userId));
+            endif;
+            $gallery->save();
             return get_success_response($gallery);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
@@ -60,7 +73,7 @@ class GalleryController extends Controller
     public function destroy(string $id)
     {
         try {
-            $gallery =  Gallery::whereUserId(auth()->id())->whereId($id)->findorfail();
+            $gallery =  Gallery::whereUserId(auth()->id())->whereId($id)->first();
             if($gallery->delete())
                 return get_success_response(['message' => 'Record deleted successfully']);
             return get_error_response(['error' =>  'Unable to delete, please contact support']);
