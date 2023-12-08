@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OtpVerificationMail;
+use App\Models\ResetToken;
 use App\Models\User;
+use App\Notifications\PasswordResetNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\Registration;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -17,31 +20,31 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
+        $validateUser = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]
+        );
+
+        if ($validateUser->fails()) {
+            return get_error_response($validateUser->errors(), 401);
+        }
+
+        if (!Auth::attempt($request->only(['email', 'password']))) {
+            return get_error_response([
+                'message' => 'Email & Password does not match with our record.',
+            ], 401);
+        }
         try {
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'email' => 'required|email',
-                    'password' => 'required'
-                ]
-            );
-
-            if ($validateUser->fails()) {
-                return get_error_response($validateUser->errors(), 401);
-            }
-
-            if (!Auth::attempt($request->only(['email', 'password']))) {
-                return get_error_response([
-                    'message' => 'Email & Password does not match with our record.',
-                ], 401);
-            }
 
             $user = User::where('email', $request->email)->first();
             if (null == $user->email_verified_at) {
                 return get_error_response(["message" => "Please verify your email to continue"], 401);
             }
             $auth_token = $user->api_token;
-            if(empty($auth_token)) {
+            if (empty($auth_token)) {
                 Auth::user()->tokens->each(function ($token, $key) {
                     $token->delete();
                 });
@@ -57,25 +60,25 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        try {
-            //Validated
-            $validateUser = Validator::make(
-                $request->all(),
-                [
-                    'email'         =>  'required|email|unique:users,email',
-                    'password'      =>  'required',
-                    'name'          =>  'required',
-                    'username'      =>  'required|unique:users,username'
-                ]
-            );
+        //Validated
+        $validateUser = Validator::make(
+            $request->all(),
+            [
+                'email'         =>  'required|email|unique:users,email',
+                'password'      =>  'required',
+                'name'          =>  'required',
+                'username'      =>  'required|unique:users,username'
+            ]
+        );
 
-            if ($validateUser->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
-            }
+        if ($validateUser->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'validation error',
+                'errors' => $validateUser->errors()
+            ], 401);
+        }
+        try {
 
             $user = User::create([
                 "name"     =>  $request->name,
@@ -113,58 +116,58 @@ class AuthController extends Controller
             $_userData['password'] = bcrypt($request->password);
         }
 
-        if($request->has("name") && !empty($request->name)) {
+        if ($request->has("name") && !empty($request->name)) {
             $_userData['name'] = $request->name;
         }
-        
-        if($request->has("gender") && !empty($request->gender)) {
+
+        if ($request->has("gender") && !empty($request->gender)) {
             $_userData['gender'] = $request->gender;
         }
-        
-        if($request->has("sexual_preference") && !empty($request->sexual_preference)) {
+
+        if ($request->has("sexual_preference") && !empty($request->sexual_preference)) {
             $_userData['sexual_preference'] = $request->sexual_preference;
         }
-        
-        if($request->has("interested_in") && !empty($request->interested_in)) {
+
+        if ($request->has("interested_in") && !empty($request->interested_in)) {
             $_userData['interested_in'] = $request->interested_in;
         }
-        
-        if($request->has("kinks") && !empty($request->kinks)) {
+
+        if ($request->has("kinks") && !empty($request->kinks)) {
             $_userData['kinks'] = $request->kinks;
         }
-        
-        if($request->has("bio") && !empty($request->bio)) {
+
+        if ($request->has("bio") && !empty($request->bio)) {
             $_userData['bio'] = $request->bio;
         }
-        
-        if($request->has("is_escort") && !empty($request->is_escort)) {
+
+        if ($request->has("is_escort") && !empty($request->is_escort)) {
             $_userData['is_escort'] = $request->is_escort;
         }
-        
-        if($request->has("impression") && !empty($request->impression)) {
+
+        if ($request->has("impression") && !empty($request->impression)) {
             $_userData['impression'] = $request->impression;
         }
-        
-        if($request->has("location") && !empty($request->location)) {
+
+        if ($request->has("location") && !empty($request->location)) {
             $_userData['location'] = $request->location;
         }
-        
-        if($request->has("tags") && !empty($request->tags)) {
+
+        if ($request->has("tags") && !empty($request->tags)) {
             $_userData['tags'] = $request->tags;
         }
-        
-        if($request->has("api_token") && !empty($request->api_token)) {
+
+        if ($request->has("api_token") && !empty($request->api_token)) {
             $_userData['api_token'] = $request->api_token;
         }
-        
-        if($request->has("plans") && !empty($request->plans)) {
+
+        if ($request->has("plans") && !empty($request->plans)) {
             $_userData['plans'] = $request->plans;
         }
-        
-        if($request->has("metadata") && !empty($request->metadata)) {
+
+        if ($request->has("metadata") && !empty($request->metadata)) {
             $_userData['metadata'] = $request->metadata;
         }
-        
+
 
         if (empty($_userData)) {
             return get_error_response(["error" => "No data was passed"]);
@@ -269,7 +272,7 @@ class AuthController extends Controller
             $msg  = [
                 'user'  =>  $customer['id'],
                 'name'  =>  $customer['name'],
-                'title' =>  'Welcome to '.getenv('APP_NAME'),
+                'title' =>  'Welcome to ' . getenv('APP_NAME'),
                 'body'  =>  "Please use this code to complete your registration: $token"
             ];
             $send = Mail::to($customer['email'])->send(new OtpVerificationMail($token, $user->name));
@@ -290,23 +293,47 @@ class AuthController extends Controller
         }
     }
 
-    public function resetPassword(Request $request)  
+    public function resetPassword(Request $request)
     {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
         try {
-            $request->validate([
-                'token' => 'required',
-                'email' => 'required|email',
-                'password' => 'required|min:8|confirmed',
-            ]);
-
             // check if reset token exists
             $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
-            if($tokenExists) {
+            if ($tokenExists) {
                 $user = User::whereEmail($request->email)->first();
                 $user->password = bcrypt($request->password);
                 $user->save();
+                return get_success_response(['succes', "Password reset successfully"]);
             }
-            return redirect(route('login'));
+            return get_error_response(['error', "Invalid Email or token provided"], 404);
+        } catch (\Throwable $th) {
+            return back()->with('error', $th->getMessage());
+        }
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|in:users,email'
+        ]);
+        try {
+
+            $user = User::whereEmail($request->email)->first();
+            $token = strtoupper(Str::random(8));
+            ResetToken::create([
+                'email' => $request->email,
+                'token' => $token
+            ]);
+
+            if ($user) {
+                $user->notify(new PasswordResetNotification($token));
+            }
+
+            return get_success_response(['msg' => "Please check your email for your reset token"]);
         } catch (\Throwable $th) {
             return back()->with('error', $th->getMessage());
         }

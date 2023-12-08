@@ -11,7 +11,7 @@ class ImageHelper
     {
         // Validate the image
         $image->validate([
-            'image' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048', // Adjust max size as needed
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif|max:10480', // Adjust max size as needed
         ]);
 
         // Generate a unique file name
@@ -24,15 +24,5 @@ class ImageHelper
         $imageUrl = asset('storage/' . $imagePath);
 
         return $imageUrl;
-
-//         $compressedImage = cloudinary()->upload($image->getRealPath(), [
-//             'folder' => 'uploads',
-//             'transformation' => [
-//                 'quality' => 'auto',
-//                 'fetch_format' => 'auto'
-//             ]
-//         ])->getSecurePath();
-        
-//         dd($compressedImage);
     }
 }

@@ -31,6 +31,8 @@ Route::group([], function() {
     Route::post('login',    [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('verify-email', [AuthController::class, 'verify_email']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-verification-email', [AuthController::class, 'resend_verification_email']);
 
     Route::group(['middleware' => 'auth:sanctum'], function() {
