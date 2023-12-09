@@ -52,8 +52,6 @@ class ReviewController extends Controller
     {
         try {
             $review = Review::findOrFail($id);
-
-            // Return a success response
             return get_success_response(['review' => $review], 200);
         } catch (\Exception $e) {
             // Return an error response
@@ -67,11 +65,8 @@ class ReviewController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            // Your update logic here
             $review = Review::findOrFail($id);
             $review->update($request->all());
-
-            // Return a success response
             return response()->json(['msg' => 'Review updated successfully', 'review' => $review], 200);
         } catch (\Exception $e) {
             // Return an error response

@@ -323,17 +323,10 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'email' => 'required'
+                'email' => 'required|exists:users,email'
             ]);
         
             $user = User::where('email', $request->email)->first();
-        
-            if (!$user) {
-                // User not found
-                // return back()->with('error', 'User not found');
-                return get_error_response(['error' => 'User not found']);
-            }
-        
             $token = strtoupper(Str::random(8));
         
             ResetToken::create([

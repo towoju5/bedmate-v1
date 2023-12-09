@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\Escorts;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MiscController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\StoriesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,22 @@ Route::group([], function() {
             Route::get('{media_id}',   [StoriesController::class, 'show']);
             Route::post('save',             [StoriesController::class, 'store']);
             Route::delete('{media_id}',     [StoriesController::class, 'destroy']);
+        });
+
+        Route::group(['prefix' => 'review'], function() {
+            Route::get('/',                 [ReviewController::class, 'index']);
+            Route::get('review_id}',        [ReviewController::class, 'show']);
+            Route::post('store',            [ReviewController::class, 'store']);
+            Route::put('update',            [ReviewController::class, 'update']);
+            Route::delete('{review_id}',    [ReviewController::class, 'destroy']);
+        });
+
+        Route::group(['prefix' => 'connections'], function() {
+            Route::post('/',            [ConnectionController::class, 'createConnection']);
+            Route::patch('{id}/accept', [ConnectionController::class, 'acceptConnection']);
+            Route::patch('{id}/reject', [ConnectionController::class, 'rejectConnection']);
+            Route::patch('{id}/pay',    [ConnectionController::class, 'payForConnection']);
+            Route::get('count',         [ConnectionController::class, 'getConnectionGroupCount']);
         });
     });
 });
