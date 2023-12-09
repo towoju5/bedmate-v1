@@ -13,11 +13,14 @@ class ConnectionController extends Controller
     public function createConnection(ConnectionRequestValidationRequest $request)
     {
         try {
+            $request->validate([
+                'booking_id' =>  'required',
+            ]);
             $user = auth()->user();
 
             $connection = Connection::create([
                 'user_id' => $user->id,
-                'connection_id' => $request->connection_id,
+                'connection_id' => $request->booking_id,
                 'status' => 'pending',
             ]);
 

@@ -67,11 +67,11 @@ Route::group([], function() {
         });
 
         Route::group(['prefix' => 'review'], function() {
-            Route::get('/',                 [ReviewController::class, 'index']);
-            Route::get('review_id}',        [ReviewController::class, 'show']);
-            Route::post('store',            [ReviewController::class, 'store']);
-            Route::put('update',            [ReviewController::class, 'update']);
-            Route::delete('{review_id}',    [ReviewController::class, 'destroy']);
+            Route::get('{user_id}',         	[ReviewController::class, 'index']);
+            Route::get('show/{review_id}',      [ReviewController::class, 'show']);
+            Route::post('store/{userId}',   	[ReviewController::class, 'store']);
+            Route::put('update/{review_id}',	[ReviewController::class, 'update']);
+            Route::delete('{review_id}',    	[ReviewController::class, 'destroy']);
         });
 
         Route::group(['prefix' => 'connections'], function() {

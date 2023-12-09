@@ -190,10 +190,10 @@ class AuthController extends Controller
     {
         try {
             $user = User::where(['email' => $request->email, 'email_verified_at' => null])->first();
-        if (!$user) {
-            return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
-        }
-        return $this->sendMail($user->toArray());
+            if (!$user) {
+                return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
+            }
+            return $this->sendMail($user->toArray());
         } catch (\Throwable $th) {
             get_error_response(["error" => $th->getMessage()]);
         }
@@ -325,20 +325,20 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|exists:users,email'
             ]);
-        
+
             $user = User::where('email', $request->email)->first();
             $token = strtoupper(Str::random(8));
-        
+
             ResetToken::create([
                 'email' => $request->email,
                 'token' => $token
             ]);
-        
+
             $user->notify(new PasswordResetNotification($token));
-        
+
             return get_success_response(['msg' => 'Please check your email for your reset token']);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
-        }        
+        }
     }
 }
