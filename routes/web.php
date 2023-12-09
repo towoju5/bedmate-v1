@@ -15,12 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    // event(new Playground([
-    //     'message' => 'Hey babe'
-    // ]));
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     // event(new Playground([
+//     //     'message' => 'Hey babe'
+//     // ]));
+//     return view('welcome');
+// });
 
-Route::get('/upload', 'FileUploadController@showUploadForm');
-Route::post('/upload', [FileUploadController::class, 'upload']);
+// Route::get('/upload', 'FileUploadController@showUploadForm');
+// Route::post('/upload', [FileUploadController::class, 'upload']);
+// Route::get('email', function()  {
+//     return view('mail.email');
+// });

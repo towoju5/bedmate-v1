@@ -6,15 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stories extends Model
+class ResetToken extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $casts = [
-        'hashtags' => 'array'
-    ];
-
-    protected $hidden = [
-        'updated_at',
+    protected $fillable = [
+        'token',
+        'email',
     ];
 }

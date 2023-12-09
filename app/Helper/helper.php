@@ -3,6 +3,12 @@
 use App\Helpers\ImageHelper;
 use App\Models\Settings;
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use SapientPro\ImageComparatorLaravel\Facades\Comparator;
+use SapientPro\ImageComparator\Strategy\DifferenceHashStrategy;
+
+
 
 if (!function_exists('getUsers')) {
     /* 
@@ -23,8 +29,36 @@ if (!function_exists('save_image')) {
      */
     function save_image($image, $path)
     {
-        $upload = ImageHelper::save_image($image, 'uploads');
-        return  $upload;
+        $image_path = '/storage/' . $path;
+        $name =  sha1(auth()->id().time()) . '.' . $image->getClientOriginalExtension();
+        $destinationPath = public_path($image_path);
+        $image->move($destinationPath, $name);
+        $paths = "$image_path/$name";
+        return asset($paths);
+    }
+}
+
+if (!function_exists('save_media')) {
+    /* 
+     * @param array $options
+     *
+     */
+    function save_media($videFile, $path)
+    {
+        $video = $videFile;
+        $filename = sha1(auth()->id().time()) . '.' . $video->getClientOriginalExtension();
+        // $path = public_path("videos/$path/$filename");
+        $storagePath = "videos/$path/resized_$filename";
+        // Save the original video
+        Storage::disk('public')->put($storagePath, file_get_contents($video));
+        // Define a command to resize the video using FFmpeg
+        $ffmpegCommand = "ffmpeg -i $path -vf 'scale=2556:1179' " . public_path($storagePath);
+        // Execute the command
+        Artisan::call('tinker', [
+            'command' => $ffmpegCommand,
+        ]);
+
+        return asset($storagePath);
     }
 }
 
@@ -51,7 +85,7 @@ if (!function_exists('settings')) {
      *
      * @return Strings
      */
-    function settings(string $key):string
+    function settings(string $key): string
     {
         $setting = Settings::where('key', $key)->first();
         if (!empty($setting)) {
@@ -75,7 +109,7 @@ if (!function_exists('per_page')) {
      *
      * @return Strings
      */
-    function per_page($per_page = 5):string
+    function per_page($per_page = 5): string
     {
         return $per_page;
     }
@@ -85,9 +119,9 @@ if (!function_exists('to_array')) {
     /**
      * convert object to array
      */
-    function to_array($data) : array
+    function to_array($data): array
     {
-        if(null == $data){
+        if (null == $data) {
             return [];
         }
         if (is_array($data)) {
@@ -107,14 +141,14 @@ if (!function_exists('get_error_response')) {
      * @param string Error message
      * @param array error response
      */
-    function get_error_response($msg, $code = 400)
+    function get_error_response($arr, $code = 400)
     {
-        $msg = [
+        $data = [
             'status' => false,
             'message' => 'Please check your request',
-            'errors' => $msg
+            'errors' => $arr
         ];
-        return response()->json($msg, $code);
+        return response()->json($data, $code);
     }
 }
 
@@ -125,13 +159,25 @@ if (!function_exists('get_success_response')) {
      * @param string message
      * @param array data response
      */
-    function get_success_response($msg)
+    function get_success_response($arr, $statusCode = 200)
     {
-        $msg = [
+        $data = [
             'status'    => true,
             'message'   => 'Request successful',
-            'data'      => $msg
+            'data'      => $arr
         ];
-        return response()->json($msg, 200);
+        return response()->json($data, $statusCode);
+    }
+}
+
+if (!function_exists('compare_image')) {
+    /**
+     * Compare the similarity between 2 different images
+     */
+    function compare_image($image1, $image2)
+    {
+        Comparator::setHashStrategy(new DifferenceHashStrategy());
+        $similarity = Comparator::compare($image1, $image2);
+        return $similarity;
     }
 }

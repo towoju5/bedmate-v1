@@ -35,6 +35,10 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
@@ -44,7 +48,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'  => 'hashed',
+        'kinks'     => 'array',
+        'is_escort' => 'boolean',
+        'tags'      => 'array',
+        'metadata'  => 'array',
+        'interested_in' => 'array',
+        'sexual_preference' => 'array',
     ];
 
 
@@ -55,7 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function messages()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(ChatMessages::class);
     }
 
     public function orders()
@@ -67,5 +77,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Gallery::class)->whereHas(function ($query) {
             $query->groupBy('file_type');
         });
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+
+    public function connections()
+    {
+        return $this->hasMany(Connection::class);
     }
 }

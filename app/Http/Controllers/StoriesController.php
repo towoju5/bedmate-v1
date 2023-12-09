@@ -13,7 +13,7 @@ class StoriesController extends Controller
     public function index()
     {
         try {
-            $stories = Stories::whereDate('created_at', '>=', now()->subHours(24))->get();
+            $stories = Stories::whereDate('created_at', '>=', now()->subHours(24))->inRandomOrder()->limit(10)->get();
             return get_success_response($stories);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
@@ -26,11 +26,15 @@ class StoriesController extends Controller
     public function store(Request $request)
     {
         try {
+            $request->validate([
+                'image' => 'required|file|mimes:jpeg,png,gif,mp4,mv4,mov,avi,heic,heif,jpg'
+            ]);
             $stories = new Stories();
+          	$stories->user_id = auth()->id();
             $stories->type = $request->story_type;
-            $stories->content = $request->content;
+            $stories->content = $request->content ??  null;
             if($request->has('image')) : 
-                $stories->image = $request->image;
+                $stories->images = save_image($request->image, 'stories');
             endif;
             $stories->save();
 
@@ -46,10 +50,10 @@ class StoriesController extends Controller
     public function show(string $id)
     {
         try {
-            $story =  Stories::whereUserId(auth()->id())->whereId($id)->findorfail();
+            $story =  Stories::whereId($id)->first();
             if($story)
-                return get_success_response(['message' => 'Record deleted successfully']);
-            return get_error_response(['error' =>  'Unable to delete, please contact support']);
+                return get_success_response($story);
+            return get_error_response(['error' =>  "Record doesn't exist or has been deleted"]);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
         }
@@ -61,7 +65,7 @@ class StoriesController extends Controller
     public function destroy(string $id)
     {
         try {
-            $gallery =  Stories::whereUserId(auth()->id())->whereId($id)->findorfail();
+            $gallery =  Stories::whereUserId(auth()->id())->first();
             if($gallery->delete())
                 return get_success_response(['message' => 'Record deleted successfully']);
             return get_error_response(['error' =>  'Unable to delete, please contact support']);
