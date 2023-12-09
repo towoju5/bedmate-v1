@@ -141,14 +141,14 @@ if (!function_exists('get_error_response')) {
      * @param string Error message
      * @param array error response
      */
-    function get_error_response($msg, $code = 400)
+    function get_error_response($arr, $code = 400)
     {
-        $msg = [
+        $data = [
             'status' => false,
             'message' => 'Please check your request',
-            'errors' => $msg
+            'errors' => $arr
         ];
-        return response()->json($msg, $code);
+        return response()->json($data, $code);
     }
 }
 
@@ -159,14 +159,14 @@ if (!function_exists('get_success_response')) {
      * @param string message
      * @param array data response
      */
-    function get_success_response($msg)
+    function get_success_response($arr, $statusCode = 200)
     {
-        $msg = [
+        $data = [
             'status'    => true,
             'message'   => 'Request successful',
-            'data'      => $msg
+            'data'      => $arr
         ];
-        return response()->json($msg, 200);
+        return response()->json($data, $statusCode);
     }
 }
 

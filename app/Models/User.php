@@ -78,4 +78,9 @@ class User extends Authenticatable implements MustVerifyEmail
             $query->groupBy('file_type');
         });
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

@@ -188,11 +188,15 @@ class AuthController extends Controller
      */
     public function resend_verification_email(Request $request)
     {
-        $user = User::where(['email' => $request->email, 'email_verified_at' => null])->first();
+        try {
+            $user = User::where(['email' => $request->email, 'email_verified_at' => null])->first();
         if (!$user) {
             return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
         }
         return $this->sendMail($user->toArray());
+        } catch (\Throwable $th) {
+            get_error_response(["error" => $th->getMessage()]);
+        }
     }
 
     /**
@@ -317,25 +321,31 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|in:users,email'
-        ]);
         try {
-
-            $user = User::whereEmail($request->email)->first();
+            $request->validate([
+                'email' => 'required'
+            ]);
+        
+            $user = User::where('email', $request->email)->first();
+        
+            if (!$user) {
+                // User not found
+                // return back()->with('error', 'User not found');
+                return get_error_response(['error' => 'User not found']);
+            }
+        
             $token = strtoupper(Str::random(8));
+        
             ResetToken::create([
                 'email' => $request->email,
                 'token' => $token
             ]);
-
-            if ($user) {
-                $user->notify(new PasswordResetNotification($token));
-            }
-
-            return get_success_response(['msg' => "Please check your email for your reset token"]);
+        
+            $user->notify(new PasswordResetNotification($token));
+        
+            return get_success_response(['msg' => 'Please check your email for your reset token']);
         } catch (\Throwable $th) {
-            return back()->with('error', $th->getMessage());
-        }
+            return get_error_response(['error' => $th->getMessage()]);
+        }        
     }
 }
