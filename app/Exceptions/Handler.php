@@ -1,28 +1,50 @@
 <?php
-
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * The list of the inputs that are never flashed to the session on validation exceptions.
-     *
-     * @var array<int, string>
-     */
-    protected $dontFlash = [
-        'current_password',
-        'password',
-        'password_confirmation',
-    ];
+    // ... other methods ...
 
     /**
-     * Register the exception handling callbacks for the application.
+     * Render an exception into an HTTP response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Throwable $e
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     * @throws \Throwable
      */
-    public function register(): void
+    public function render($request, Throwable $e)
     {
+<<<<<<< HEAD
+        if ($request->expectsJson()) {
+            // Handle validation exceptions
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            // Handle other HTTP exceptions
+            if ($e instanceof HttpException) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], $e->getStatusCode());
+            }
+
+            // Handle other types of exceptions
+            return response()->json([
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+
+        return parent::render($request, $e);
+=======
         $this->reportable(function (Throwable $e) {
             try {
                 return get_error_response([
@@ -34,5 +56,6 @@ class Handler extends ExceptionHandler
                 ]);
             }
         });
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     }
 }

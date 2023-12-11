@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatsController;
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\Escorts;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MiscController;
@@ -67,11 +68,11 @@ Route::group([], function() {
         });
 
         Route::group(['prefix' => 'review'], function() {
-            Route::get('/',                 [ReviewController::class, 'index']);
-            Route::get('review_id}',        [ReviewController::class, 'show']);
-            Route::post('store',            [ReviewController::class, 'store']);
-            Route::put('update',            [ReviewController::class, 'update']);
-            Route::delete('{review_id}',    [ReviewController::class, 'destroy']);
+            Route::get('{user_id}',         	[ReviewController::class, 'index']);
+            Route::get('show/{review_id}',      [ReviewController::class, 'show']);
+            Route::post('store/{userId}',   	[ReviewController::class, 'store']);
+            Route::put('update/{review_id}',	[ReviewController::class, 'update']);
+            Route::delete('{review_id}',    	[ReviewController::class, 'destroy']);
         });
 
         Route::group(['prefix' => 'connections'], function() {
@@ -80,6 +81,18 @@ Route::group([], function() {
             Route::patch('{id}/reject', [ConnectionController::class, 'rejectConnection']);
             Route::patch('{id}/pay',    [ConnectionController::class, 'payForConnection']);
             Route::get('count',         [ConnectionController::class, 'getConnectionGroupCount']);
+        });
+
+        Route::group(['prefix' => 'user'], function() {
+            Route::put('profile-image',     [AuthController::class, 'updateProfileImage']);
+            Route::get('get-by-username',   [AuthController::class, 'usernameCheck']);
+            Route::group(['prefix' => 'meta-data'], function() {
+                Route::post('/',                [AuthController::class, 'index']);
+                Route::post('get',              [AuthController::class, 'show']);
+                Route::post('add',              [AuthController::class, 'store']);
+                Route::put('update/{key}',      [AuthController::class, 'update']);
+                Route::delete('delete/{key}',   [AuthController::class, 'destroy']);
+            });
         });
     });
 });

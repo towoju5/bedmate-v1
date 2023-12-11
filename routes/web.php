@@ -15,12 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     // event(new Playground([
-//     //     'message' => 'Hey babe'
-//     // ]));
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+    return get_success_response([
+        "message" =>  "In the time of myth, in the kingdom of fun, there lived a platform : named Cumrid............"
+    ]);
+});
 
 // Route::get('/upload', 'FileUploadController@showUploadForm');
 // Route::post('/upload', [FileUploadController::class, 'upload']);

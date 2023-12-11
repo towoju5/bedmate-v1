@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reviews', function (Blueprint $table) {
+        Schema::create('connections', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->text('content');
-            $table->integer('ratings')->default(1);
-<<<<<<< HEAD
-            $table->foreignId('rated_by')->constrained('users')->onDelete('cascade');
-=======
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
+            $table->foreignId('user_id')->constrained('users');
+            $table->boolean('is_escort');
+            $table->foreignId('connection_id')->constrained('bookings');
+            $table->string('status')->comment('is user or escort accepted');
+            $table->string('payment_status');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reviews');
+        Schema::dropIfExists('connections');
     }
 };

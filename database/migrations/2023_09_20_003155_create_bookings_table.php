@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('created_by')->constrained('users');
+            $table->integer('total_escort')->default(1);
+            $table->enum('escort_type', ['male', 'female'])->default('female');
+            $table->boolean('is_group_order')->default(false);
+            $table->integer('total_male')->nullable();
+            $table->integer('total_female')->nullable();
+            $table->string('meeting_location')->nullable();
             $table->timestamps();
         });
     }

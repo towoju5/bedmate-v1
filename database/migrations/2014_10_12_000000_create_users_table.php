@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('username');
+            $table->string('username')->unique();
             $table->string('email')->unique();
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
@@ -29,9 +29,12 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->string('tags')->nullable();
             $table->string('api_token')->nullable();
+            $table->string('profile_image')->default(url('logo.png'))->nullable();
             $table->enum('plans', ['freemium', 'standard', 'premium'])->default('freemium');
             $table->json('metadata')->nullable();
             $table->rememberToken();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

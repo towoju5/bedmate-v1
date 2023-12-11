@@ -10,24 +10,31 @@ class Escorts extends Controller
     public function kinks(Request $request)
     {
         try {
-            // $user = $request->user();
-            // $my_plan = $user->plan;
             $query = User::where('is_escort', true)
                 ->inRandomOrder()
                 ->when($request->has('tags'), function ($query) use ($request) {
                     $query->whereJsonContains('tags', $request->tags);
                 })
                 ->when($request->has('plan'), function ($query) use ($request) {
-                    // if($request->has('min-plan'))  {
-                    //     // get list of 
-                    // }
+                    // Add logic for plan if needed
                 })
                 ->when($request->has('fees'), function ($query) use ($request) {
                     $fee = explode('-', $request->fees);
                     $query->whereBetween('amount', [$fee[0], $fee[1]]);
                 })
                 ->when($request->has('location'), function ($query) use ($request) {
-                    $query->where('location', $request->location);
+                    // Assuming the request has 'latitude' and 'longitude' keys
+                    $user = $request->user();
+                    $latitude = $user->latitude;
+                    $longitude = $user->longitude;
+                    $radius = $request->location; // The radius in kilometers
+
+                    $query->selectRaw(
+                        '(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
+                        [$latitude, $longitude, $latitude]
+                    )
+                        ->having('distance', '<', $radius)
+                        ->orderBy('distance');
                 })
                 ->paginate(24);
 
