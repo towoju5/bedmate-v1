@@ -14,11 +14,8 @@ use App\Notifications\Registration;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-=======
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -28,15 +25,10 @@ class AuthController extends Controller
         $validateUser = Validator::make(
             $request->all(),
             [
-<<<<<<< HEAD
                 'email'     =>  'required|email',
                 'password'  =>  'required',
                 'latitude'  =>  'required',
                 'longitude' =>  'required',
-=======
-                'email' => 'required|email',
-                'password' => 'required'
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             ]
         );
 
@@ -217,7 +209,6 @@ class AuthController extends Controller
     {
         try {
             $user = User::where(['email' => $request->email, 'email_verified_at' => null])->first();
-<<<<<<< HEAD
             if (!$user) {
                 return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
             }
@@ -225,15 +216,6 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             get_error_response(["error" => $th->getMessage()]);
         }
-=======
-        if (!$user) {
-            return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
-        }
-        return $this->sendMail($user->toArray());
-        } catch (\Throwable $th) {
-            get_error_response(["error" => $th->getMessage()]);
-        }
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     }
 
     /**
@@ -343,15 +325,9 @@ class AuthController extends Controller
         ]);
         try {
             // check if reset token exists
-<<<<<<< HEAD
             // $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
             $user = User::whereEmail($request->email)->first();
             if ($user) {
-=======
-            $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
-            if ($tokenExists) {
-                $user = User::whereEmail($request->email)->first();
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
                 $user->password = bcrypt($request->password);
                 $user->save();
                 return get_success_response(['succes', "Password reset successfully"]);
@@ -368,22 +344,14 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|exists:users,email'
             ]);
-<<<<<<< HEAD
 
             $user = User::where('email', $request->email)->first();
             $token = strtoupper(Str::random(8));
 
-=======
-        
-            $user = User::where('email', $request->email)->first();
-            $token = strtoupper(Str::random(8));
-        
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             ResetToken::create([
                 'email' => $request->email,
                 'token' => $token
             ]);
-<<<<<<< HEAD
 
             $user->notify(new PasswordResetNotification($token));
 
@@ -424,14 +392,5 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
-=======
-        
-            $user->notify(new PasswordResetNotification($token));
-        
-            return get_success_response(['msg' => 'Please check your email for your reset token']);
-        } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage()]);
-        }        
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     }
 }
