@@ -68,19 +68,11 @@ Route::group([], function() {
         });
 
         Route::group(['prefix' => 'review'], function() {
-<<<<<<< HEAD
             Route::get('{user_id}',         	[ReviewController::class, 'index']);
             Route::get('show/{review_id}',      [ReviewController::class, 'show']);
             Route::post('store/{userId}',   	[ReviewController::class, 'store']);
             Route::put('update/{review_id}',	[ReviewController::class, 'update']);
             Route::delete('{review_id}',    	[ReviewController::class, 'destroy']);
-=======
-            Route::get('/',                 [ReviewController::class, 'index']);
-            Route::get('review_id}',        [ReviewController::class, 'show']);
-            Route::post('store',            [ReviewController::class, 'store']);
-            Route::put('update',            [ReviewController::class, 'update']);
-            Route::delete('{review_id}',    [ReviewController::class, 'destroy']);
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
         });
 
         Route::group(['prefix' => 'connections'], function() {
@@ -89,7 +81,6 @@ Route::group([], function() {
             Route::patch('{id}/reject', [ConnectionController::class, 'rejectConnection']);
             Route::patch('{id}/pay',    [ConnectionController::class, 'payForConnection']);
             Route::get('count',         [ConnectionController::class, 'getConnectionGroupCount']);
-<<<<<<< HEAD
         });
 
         Route::group(['prefix' => 'user'], function() {
@@ -102,8 +93,6 @@ Route::group([], function() {
                 Route::put('update/{key}',      [AuthController::class, 'update']);
                 Route::delete('delete/{key}',   [AuthController::class, 'destroy']);
             });
-=======
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
         });
     });
 });
