@@ -14,9 +14,5 @@ class Review extends Model
         "user_id",
         "content",
         "ratings",
-<<<<<<< HEAD
-        "rated_by"
-=======
->>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     ];
 }
