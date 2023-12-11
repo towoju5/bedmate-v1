@@ -7,6 +7,7 @@ use App\Models\ResetToken;
 use App\Models\User;
 use App\Notifications\PasswordResetNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class TokenController extends Controller
@@ -22,7 +23,7 @@ class TokenController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function send(Request $request)
     {
         try {
             $request->validate([
@@ -30,16 +31,21 @@ class TokenController extends Controller
             ]);
 
             $user = User::where('email', $request->email)->first();
-            $token = strtoupper(Str::random(8));
+          
+            if($user && $request->email == auth()->user()->email) {
+                $token = strtoupper(Str::random(6));
+                ResetToken::where('email', $request->email)->delete();
 
-            ResetToken::create([
-                'email' => $request->email,
-                'token' => $token
-            ]);
+                ResetToken::create([
+                    'email' => $request->email,
+                    'token' => $token
+                ]);
 
-            $user->notify(new OtpVerificationMail($token));
+                Mail::to($request->email)->send(new OtpVerificationMail($token, $user->name));
 
-            return get_success_response(['msg' => 'Please check your email for your reset token']);
+                return get_success_response(['msg' => 'Please check your email for your reset token']);
+            }
+            return get_error_response(['error' => "User not found"]);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
@@ -48,15 +54,21 @@ class TokenController extends Controller
     /**
      * Display the specified resource.
      */
-    public function verifyToken(string $token)
+    public function verify(Request $request)
     {
         try {
+            $request->validate([
+                'token' => 'required'
+            ]);
+
             // check if token exists
-            $tokenExists = ResetToken::where(['email' => auth()->user()->email, 'token' => $token])->first();
+          	$token = $request->token;
+          	$user  = $request->user();
+            $tokenExists = ResetToken::where(['email' => $user->email, 'token' => $token])->first();
             if ($tokenExists && $tokenExists->delete()) {
-                return get_success_response(['succes', "Token verified successfully"]);
+                return get_success_response(['succes' => "Token verified successfully"]);
             }
-            return get_error_response(['error', "Invalid Email or token provided"], 401);
+            return get_error_response(['error' => "Invalid token provided"], 401);
         } catch (\Throwable $th) {
             return back()->with('error', $th->getMessage());
         }

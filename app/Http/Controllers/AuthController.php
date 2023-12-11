@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -24,8 +25,10 @@ class AuthController extends Controller
         $validateUser = Validator::make(
             $request->all(),
             [
-                'email' => 'required|email',
-                'password' => 'required'
+                'email'     =>  'required|email',
+                'password'  =>  'required',
+                'latitude'  =>  'required',
+                'longitude' =>  'required',
             ]
         );
 
@@ -206,10 +209,10 @@ class AuthController extends Controller
     {
         try {
             $user = User::where(['email' => $request->email, 'email_verified_at' => null])->first();
-        if (!$user) {
-            return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
-        }
-        return $this->sendMail($user->toArray());
+            if (!$user) {
+                return get_error_response(['msg' => 'Invalid data supplied or Email already verified.'], 400);
+            }
+            return $this->sendMail($user->toArray());
         } catch (\Throwable $th) {
             get_error_response(["error" => $th->getMessage()]);
         }
@@ -322,9 +325,9 @@ class AuthController extends Controller
         ]);
         try {
             // check if reset token exists
-            $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
-            if ($tokenExists) {
-                $user = User::whereEmail($request->email)->first();
+            // $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
+            $user = User::whereEmail($request->email)->first();
+            if ($user) {
                 $user->password = bcrypt($request->password);
                 $user->save();
                 return get_success_response(['succes', "Password reset successfully"]);
@@ -341,20 +344,54 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|exists:users,email'
             ]);
-        
+
             $user = User::where('email', $request->email)->first();
             $token = strtoupper(Str::random(8));
-        
+
             ResetToken::create([
                 'email' => $request->email,
                 'token' => $token
             ]);
-        
-            $user->notify(new PasswordResetNotification($token));
-        
+
+            //$user->notify(new PasswordResetNotification($token));
+          	Mail::to($user->email)->send(new OtpVerificationMail($token, $user->username));
+
             return get_success_response(['msg' => 'Please check your email for your reset token']);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
-        }        
+        }
+    }
+
+    public function updateProfileImage(Request $request)
+    {
+        try {
+            $request->validate([
+                'profile_image' => 'required|file|mimes:jpeg,png,gif,heic,heif,jpg'
+            ]);
+
+            $user = $request->user();
+            $username = $user->username;
+            if($imageUrl = save_image($request->profile_image, "profile-image/$username")) {
+                $user->profile_image = $imageUrl;
+                return get_success_response($imageUrl);
+            }
+            return get_error_response(["error" => "we're currently unable to process your request, try again later"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
+
+    public function usernameCheck($username)
+    {
+        try {
+            $user = getUserByUsername($username);
+            if($user != false) {
+                return get_success_response($user);
+            }
+
+            return get_error_response(['error' => "User with the provided username does not exists"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 }

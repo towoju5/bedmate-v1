@@ -20,16 +20,28 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
-        $this->reportable(function (Throwable $e) {
-            try {
-                return get_error_response([
-                    'error' => $e->getMessage()
-                ]);
-            } catch (\Throwable $th) {
-                return get_error_response([
-                    'error' => $th->getMessage()
-                ]);
+        if ($request->expectsJson()) {
+            // Handle validation exceptions
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $e->errors(),
+                ], 422);
             }
-        });
+
+            // Handle other HTTP exceptions
+            if ($e instanceof HttpException) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], $e->getStatusCode());
+            }
+
+            // Handle other types of exceptions
+            return response()->json([
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
+
+        return parent::render($request, $e);
     }
 }

@@ -14,5 +14,6 @@ class Review extends Model
         "user_id",
         "content",
         "ratings",
+        "rated_by"
     ];
 }

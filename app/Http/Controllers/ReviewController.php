@@ -11,13 +11,10 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($userId)
     {
         try {
-            $user = User::find(auth()->id());
-            if ($user) {
-                $reviews = $user->reviews();
-            }
+            $reviews = Review::whereUserId($userId)->get();
             return get_success_response($reviews);
         } catch (\Throwable $th) {
             get_error_response(["error" => $th->getMessage()]);
@@ -27,17 +24,18 @@ class ReviewController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $userId)
     {
         try {
             $validate = $request->validate([
                 'content'   =>  'required',
-                'rating'    =>  'required|numeric|min:1,max:5',
+                'ratings'   =>  'required|numeric|min:1,max:5',
             ]);
 
-            $validate['user_id'] = auth()->id();
+            $validate['user_id'] = $userId;
+            $validate['rated_by'] = auth()->id();
             if($review = Review::create($validate)){
-                return response()->json($review, 201);
+                return get_success_response($review, 201);
             }
         } catch (\Exception $e) {
             // Return an error response
@@ -52,7 +50,7 @@ class ReviewController extends Controller
     {
         try {
             $review = Review::findOrFail($id);
-            return get_success_response(['review' => $review], 200);
+            return get_success_response($review);
         } catch (\Exception $e) {
             // Return an error response
             return get_error_response(['error' => $e->getMessage()], 404);
@@ -65,8 +63,13 @@ class ReviewController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+            $validate = $request->validate([
+                'content'   =>  'required',
+                'ratings'   =>  'required|numeric|min:1,max:5',
+            ]);
+
             $review = Review::findOrFail($id);
-            $review->update($request->all());
+            $review->update($validate);
             return response()->json(['msg' => 'Review updated successfully', 'review' => $review], 200);
         } catch (\Exception $e) {
             // Return an error response
