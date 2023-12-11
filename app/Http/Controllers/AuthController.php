@@ -14,6 +14,8 @@ use App\Notifications\Registration;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -23,8 +25,10 @@ class AuthController extends Controller
         $validateUser = Validator::make(
             $request->all(),
             [
-                'email' => 'required|email',
-                'password' => 'required'
+                'email'     =>  'required|email',
+                'password'  =>  'required',
+                'latitude'  =>  'required',
+                'longitude' =>  'required',
             ]
         );
 
@@ -50,6 +54,21 @@ class AuthController extends Controller
                 });
                 $auth_token = Auth::user()->createToken('api-token');
                 $user->api_token = explode("|", $auth_token->plainTextToken);
+
+                // update user location
+                $user->latitude = $request->latitude;
+                $user->longitude = $request->longitude;
+
+                // log user location history to user history file => get user location-history.txt and append location
+                $data = json_encode([
+                    now() => [
+                        "latitude" => $request->latitude,
+                        "longitude" => $request->longitude,
+                    ]
+                ]);
+                File::append(storage_path("$user->username/location-history.txt"), $data);
+
+                // update user ::DB record
                 $user->save();
             }
             return get_success_response(['token' => $user->api_token]);
@@ -337,6 +356,39 @@ class AuthController extends Controller
             $user->notify(new PasswordResetNotification($token));
 
             return get_success_response(['msg' => 'Please check your email for your reset token']);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
+
+    public function updateProfileImage(Request $request)
+    {
+        try {
+            $request->validate([
+                'profile_image' => 'required|file|mimes:jpeg,png,gif,heic,heif,jpg'
+            ]);
+
+            $user = $request->user();
+            $username = $user->username;
+            if($imageUrl = save_image($request->profile_image, "profile-image/$username")) {
+                $user->profile_image = $imageUrl;
+                return get_success_response($imageUrl);
+            }
+            return get_error_response(["error" => "we're currently unable to process your request, try again later"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
+
+    public function usernameCheck($username)
+    {
+        try {
+            $user = getUserByUsername($username);
+            if($user != false) {
+                return get_success_response($user);
+            }
+
+            return get_error_response(['error' => "User with the provided username does not exists"]);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }

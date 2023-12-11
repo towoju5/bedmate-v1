@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    return view('welcome');
     return get_success_response([
         "message" =>  "In the time of myth, in the kingdom of fun, there lived a platform : named Cumrid............"
     ]);
