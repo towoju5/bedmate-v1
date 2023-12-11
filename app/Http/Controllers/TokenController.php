@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Mail\OtpVerificationMail;
 use App\Models\ResetToken;
+use App\Models\User;
 use App\Notifications\PasswordResetNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TokenController extends Controller
 {
@@ -51,10 +53,10 @@ class TokenController extends Controller
         try {
             // check if token exists
             $tokenExists = ResetToken::where(['email' => auth()->user()->email, 'token' => $token])->first();
-            if ($tokenExists) {
+            if ($tokenExists && $tokenExists->delete()) {
                 return get_success_response(['succes', "Token verified successfully"]);
             }
-            return get_error_response(['error', "Invalid Email or token provided"], 404);
+            return get_error_response(['error', "Invalid Email or token provided"], 401);
         } catch (\Throwable $th) {
             return back()->with('error', $th->getMessage());
         }

@@ -325,9 +325,9 @@ class AuthController extends Controller
         ]);
         try {
             // check if reset token exists
-            $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
-            if ($tokenExists) {
-                $user = User::whereEmail($request->email)->first();
+            // $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
+            $user = User::whereEmail($request->email)->first();
+            if ($user) {
                 $user->password = bcrypt($request->password);
                 $user->save();
                 return get_success_response(['succes', "Password reset successfully"]);
