@@ -13,7 +13,7 @@ class StoriesController extends Controller
     public function index()
     {
         try {
-            $stories = Stories::whereDate('created_at', '>=', now()->subHours(24))->inRandomOrder()->limit(10)->get();
+            $stories = Stories::whereDate('created_at', '>=', now()->subHours(24))->inRandomOrder()->limit(20)->get();
             return get_success_response($stories);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
@@ -26,9 +26,22 @@ class StoriesController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'image' => 'required|file|mimes:jpeg,png,gif,mp4,mv4,mov,avi,heic,heif,jpg'
+          	$request->validate([
+                'story_type' => 'required'
             ]);
+          
+          	if($request->story_type == 'image'){
+                $request->validate([
+                    'image' => 'required|file|mimes:jpeg,png,gif,mp4,mv4,mov,avi,heic,heif,jpg'
+                ]);
+            }
+          
+          	if($request->story_type == 'text'){
+                $request->validate([
+                    'content' => 'required'
+                ]);
+            }
+          
             $stories = new Stories();
           	$stories->user_id = auth()->id();
             $stories->type = $request->story_type;

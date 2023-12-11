@@ -27,8 +27,6 @@ class AuthController extends Controller
             [
                 'email'     =>  'required|email',
                 'password'  =>  'required',
-                'latitude'  =>  'required',
-                'longitude' =>  'required',
             ]
         );
 
@@ -56,14 +54,14 @@ class AuthController extends Controller
                 $user->api_token = explode("|", $auth_token->plainTextToken);
 
                 // update user location
-                $user->latitude = $request->latitude;
-                $user->longitude = $request->longitude;
+                $user->latitude = $request->latitude ?? null;
+                $user->longitude = $request->longitude ?? null;
 
                 // log user location history to user history file => get user location-history.txt and append location
                 $data = json_encode([
                     now() => [
-                        "latitude" => $request->latitude,
-                        "longitude" => $request->longitude,
+                        "latitude" => $request->latitude ?? null,
+                        "longitude" => $request->longitude ?? null,
                     ]
                 ]);
                 File::append(storage_path("$user->username/location-history.txt"), $data);
@@ -173,10 +171,6 @@ class AuthController extends Controller
 
         if ($request->has("tags") && !empty($request->tags)) {
             $_userData['tags'] = $request->tags;
-        }
-
-        if ($request->has("api_token") && !empty($request->api_token)) {
-            $_userData['api_token'] = $request->api_token;
         }
 
         if ($request->has("plans") && !empty($request->plans)) {
@@ -319,20 +313,21 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token' => 'required',
+          	'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
         try {
             // check if reset token exists
-            // $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->first();
+            $tokenExists = ResetToken::where(['email' => $request->email, 'token' => $request->token])->withTrashed()->first();
             $user = User::whereEmail($request->email)->first();
-            if ($user) {
+            if ($tokenExists && $user) {
+              	$tokenExists->forceDelete();
                 $user->password = bcrypt($request->password);
                 $user->save();
-                return get_success_response(['succes', "Password reset successfully"]);
+                return get_success_response(['succes' => "Password reset successfully"]);
             }
-            return get_error_response(['error', "Invalid Email or token provided"], 404);
+            return get_error_response(['error' => "Invalid Email or token provided"], 404);
         } catch (\Throwable $th) {
             return back()->with('error', $th->getMessage());
         }
@@ -346,7 +341,7 @@ class AuthController extends Controller
             ]);
 
             $user = User::where('email', $request->email)->first();
-            $token = strtoupper(Str::random(8));
+            $token = strtoupper(Str::random(6));
 
             ResetToken::create([
                 'email' => $request->email,
@@ -366,14 +361,14 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'profile_image' => 'required|file|mimes:jpeg,png,gif,heic,heif,jpg'
+                'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif',
             ]);
 
             $user = $request->user();
             $username = $user->username;
             if($imageUrl = save_image($request->profile_image, "profile-image/$username")) {
                 $user->profile_image = $imageUrl;
-                return get_success_response($imageUrl);
+                return get_success_response($user);
             }
             return get_error_response(["error" => "we're currently unable to process your request, try again later"]);
         } catch (\Throwable $th) {

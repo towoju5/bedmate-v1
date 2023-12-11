@@ -2,6 +2,8 @@
 
 use App\Events\Playground;
 use App\Http\Controllers\FileUploadController;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,3 +29,17 @@ Route::get('/', function () {
 // Route::get('email', function()  {
 //     return view('mail.email');
 // });
+
+Route::get('sample', function () {
+    $password = Hash::make('password');
+    for ($i = 0; $i < 30; $i++) {
+        User::factory()->create([
+            'name' => fake()->name(),
+            'email' => fake()->companyEmail(),
+            'is_escort' => true,
+            'password' => $password,
+            'username' => fake()->userName(),
+            'plans' => 'freemium'
+        ]);
+    }
+});
