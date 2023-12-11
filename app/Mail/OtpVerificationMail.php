@@ -26,6 +26,10 @@ class OtpVerificationMail extends Mailable
                 'otp' => $this->otp,
                 'user'=> $this->username,
             ])
+<<<<<<< HEAD
             ->subject('Your E-mail Verification Code');
+=======
+            ->subject('Your OTP for email verification');
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     }
 }

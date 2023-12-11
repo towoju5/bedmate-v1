@@ -3,7 +3,10 @@
 use App\Helpers\ImageHelper;
 use App\Models\Settings;
 use App\Models\User;
+<<<<<<< HEAD
 use App\Models\UserMeta;
+=======
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use SapientPro\ImageComparatorLaravel\Facades\Comparator;
@@ -182,6 +185,7 @@ if (!function_exists('compare_image')) {
         return $similarity;
     }
 }
+<<<<<<< HEAD
 
 if (!function_exists('getUserByUsername')) {
     /**
@@ -219,3 +223,5 @@ if (!function_exists('getUserByMetaData')) {
         return false;
     }
 }
+=======
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b

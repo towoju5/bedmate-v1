@@ -20,6 +20,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
+<<<<<<< HEAD
         if ($request->expectsJson()) {
             // Handle validation exceptions
             if ($e instanceof ValidationException) {
@@ -43,5 +44,18 @@ class Handler extends ExceptionHandler
         }
 
         return parent::render($request, $e);
+=======
+        $this->reportable(function (Throwable $e) {
+            try {
+                return get_error_response([
+                    'error' => $e->getMessage()
+                ]);
+            } catch (\Throwable $th) {
+                return get_error_response([
+                    'error' => $th->getMessage()
+                ]);
+            }
+        });
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     }
 }

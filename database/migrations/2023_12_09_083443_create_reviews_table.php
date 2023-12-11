@@ -16,7 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->text('content');
             $table->integer('ratings')->default(1);
+<<<<<<< HEAD
             $table->foreignId('rated_by')->constrained('users')->onDelete('cascade');
+=======
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

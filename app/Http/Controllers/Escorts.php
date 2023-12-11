@@ -10,19 +10,31 @@ class Escorts extends Controller
     public function kinks(Request $request)
     {
         try {
+<<<<<<< HEAD
+=======
+            // $user = $request->user();
+            // $my_plan = $user->plan;
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             $query = User::where('is_escort', true)
                 ->inRandomOrder()
                 ->when($request->has('tags'), function ($query) use ($request) {
                     $query->whereJsonContains('tags', $request->tags);
                 })
                 ->when($request->has('plan'), function ($query) use ($request) {
+<<<<<<< HEAD
                     // Add logic for plan if needed
+=======
+                    // if($request->has('min-plan'))  {
+                    //     // get list of 
+                    // }
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
                 })
                 ->when($request->has('fees'), function ($query) use ($request) {
                     $fee = explode('-', $request->fees);
                     $query->whereBetween('amount', [$fee[0], $fee[1]]);
                 })
                 ->when($request->has('location'), function ($query) use ($request) {
+<<<<<<< HEAD
                     // Assuming the request has 'latitude' and 'longitude' keys
                     $user = $request->user();
                     $latitude = $user->latitude;
@@ -35,6 +47,9 @@ class Escorts extends Controller
                     )
                         ->having('distance', '<', $radius)
                         ->orderBy('distance');
+=======
+                    $query->where('location', $request->location);
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
                 })
                 ->paginate(24);
 

@@ -11,10 +11,20 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
+<<<<<<< HEAD
     public function index($userId)
     {
         try {
             $reviews = Review::whereUserId($userId)->get();
+=======
+    public function index()
+    {
+        try {
+            $user = User::find(auth()->id());
+            if ($user) {
+                $reviews = $user->reviews();
+            }
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             return get_success_response($reviews);
         } catch (\Throwable $th) {
             get_error_response(["error" => $th->getMessage()]);
@@ -24,11 +34,16 @@ class ReviewController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+<<<<<<< HEAD
     public function store(Request $request, $userId)
+=======
+    public function store(Request $request)
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
     {
         try {
             $validate = $request->validate([
                 'content'   =>  'required',
+<<<<<<< HEAD
                 'ratings'   =>  'required|numeric|min:1,max:5',
             ]);
 
@@ -36,6 +51,14 @@ class ReviewController extends Controller
             $validate['rated_by'] = auth()->id();
             if($review = Review::create($validate)){
                 return get_success_response($review, 201);
+=======
+                'rating'    =>  'required|numeric|min:1,max:5',
+            ]);
+
+            $validate['user_id'] = auth()->id();
+            if($review = Review::create($validate)){
+                return response()->json($review, 201);
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             }
         } catch (\Exception $e) {
             // Return an error response
@@ -50,7 +73,11 @@ class ReviewController extends Controller
     {
         try {
             $review = Review::findOrFail($id);
+<<<<<<< HEAD
             return get_success_response($review);
+=======
+            return get_success_response(['review' => $review], 200);
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
         } catch (\Exception $e) {
             // Return an error response
             return get_error_response(['error' => $e->getMessage()], 404);
@@ -63,6 +90,7 @@ class ReviewController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+<<<<<<< HEAD
             $validate = $request->validate([
                 'content'   =>  'required',
                 'ratings'   =>  'required|numeric|min:1,max:5',
@@ -70,6 +98,10 @@ class ReviewController extends Controller
 
             $review = Review::findOrFail($id);
             $review->update($validate);
+=======
+            $review = Review::findOrFail($id);
+            $review->update($request->all());
+>>>>>>> d9c9e64fa65359c8b436f513e49a8158be33773b
             return response()->json(['msg' => 'Review updated successfully', 'review' => $review], 200);
         } catch (\Exception $e) {
             // Return an error response
