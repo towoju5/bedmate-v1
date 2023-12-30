@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->json('hashtags')->nullable();
+            $table->enum('type', ['text', 'image'])->default('text');
             $table->string('images');
             $table->boolean('is_flagged')->default(false);
             $table->boolean('is_liked')->default(false);
+            $table->string('content', 255)->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

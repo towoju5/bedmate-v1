@@ -17,4 +17,15 @@ class Stories extends Model
     protected $hidden = [
         'updated_at',
     ];
+
+
+    /**
+     * Define the 'user' relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
