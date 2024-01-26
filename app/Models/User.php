@@ -97,6 +97,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function stories()
     {
-        return $this->hasMany(Story::class, 'user_id');
+        return $this->hasMany(Stories::class, 'user_id');
+    }
+
+    public function ActivateKink()
+    {
+        $this->update([
+            'is_escort' => true
+        ]);
     }
 }

@@ -13,6 +13,7 @@ class StoriesController extends Controller
     public function index()
     {
         try {
+            // $
             $stories = Stories::with('user')->whereDate('created_at', '>=', now()->subHours(24))->inRandomOrder()->limit(20)->get();
             $groupedStories = [];
             foreach ($stories as $story) {
@@ -22,15 +23,14 @@ class StoriesController extends Controller
                 $groupedStories[$username]['data'] = [
                     'id' => $story->id,
                     'user_id' => $story->user_id,
-                    'type' => $story->type,
+                    'type' => $story->type ?? null,
                     'images' => $story->images,
                     'created_at' => $story->created_at,
                     'hashtags' => $story->hashtags,
                     'content' => $story->content,
                 ];
             }
-        
-            return get_success_response($groupedStories);
+            return get_success_response([$groupedStories]);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
         }

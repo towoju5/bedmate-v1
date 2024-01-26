@@ -51,8 +51,14 @@ Route::group([], function() {
 
         Route::group(['prefix' => 'kinks'], function() {
             Route::get('/', [Escorts::class, 'kinks']);
+            Route::put('become-kink', [Escorts::class, 'becomeAkinks']);
             Route::get('{customer_id}', [Escorts::class, 'kink']);
             Route::delete('{customer_id}', [Escorts::class, 'destroy']);
+            
+            // packages
+            Route::post('{escortId}/packages',              [Escorts::class, 'addPackage']);
+            Route::put('{escortId}/packages/{packageId}',   [Escorts::class, 'updatePackage']);
+            Route::delete('{escortId}/packages/{packageId}', [Escorts::class, 'deletePackage']);
         });
 
         Route::group(['prefix' => 'gallery'], function() {
@@ -102,11 +108,13 @@ Route::group([], function() {
                 Route::delete('delete/{key}',   [UserMetaController::class, 'destroy']);
             });
         });
-        
+
     });
+
+    Route::post('verify-images', [MiscController::class, 'verifyImages']);
 });
 
-Route::any('login', function() {
+Route::post('no-login', function() {
 	return get_error_response(['error' => "Unathenticated request"], 401);
 })->name('login');
 

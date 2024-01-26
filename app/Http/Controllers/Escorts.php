@@ -38,10 +38,21 @@ class Escorts extends Controller
                 })
                 ->paginate(24);
 
-
             return get_success_response($query);
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
+        }
+    }
+
+    public function becomeAkinks()
+    {
+        try {
+            $escort = new User();
+            if($escort->ActivateKink()){
+                return get_success_response(['msg' => "User successfully upgraded to escort"]);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
@@ -68,5 +79,48 @@ class Escorts extends Controller
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
         }
+    }
+
+
+    public function addPackage(Request $request, $escortId)
+    {
+        $request->validate([
+            'package_name' => 'required',
+            'package_price' => 'required|numeric',
+            'package_duration_days' => 'required|integer',
+            'package_type' => 'sometimes',
+            'other_package_details' => 'sometimes'      
+        ]);
+
+        $escort = Escorts::findOrFail($escortId);
+        $package = $escort->packages()->create($request->all());
+
+        return response()->json($package, 201);
+    }
+
+    public function updatePackage(Request $request, $escortId, $packageId)
+    {
+        $request->validate([
+            'package_name' => 'required',
+            'package_price' => 'required|numeric',
+            'package_duration_days' => 'required|integer',
+            'package_type' => 'sometimes',
+            'other_package_details' => 'sometimes' 
+        ]);
+
+        $escort = Escorts::findOrFail($escortId);
+        $package = $escort->packages()->findOrFail($packageId);
+        $package->update($request->all());
+
+        return response()->json($package, 200);
+    }
+
+    public function deletePackage($escortId, $packageId)
+    {
+        $escort = Escorts::findOrFail($escortId);
+        $package = $escort->packages()->findOrFail($packageId);
+        $package->delete();
+
+        return response()->json(null, 204);
     }
 }

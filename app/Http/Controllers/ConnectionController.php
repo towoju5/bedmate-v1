@@ -95,7 +95,7 @@ class ConnectionController extends Controller
             }
 
             return get_error_response(['message' => 'Unauthorized or invalid request'], 403);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {class
             return get_error_response(['error' => $th->getMessage()]);
         }
     }
@@ -105,9 +105,7 @@ class ConnectionController extends Controller
     public function getConnectionGroupCount()
     {
         $user = auth()->user();
-
         $connectionCount = $user->connections()->count();
-
         return response()->json(['message' => 'Connection group count retrieved successfully', 'count' => $connectionCount]);
     }
 }
