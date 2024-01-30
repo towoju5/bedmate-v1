@@ -8,6 +8,8 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\StoriesController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\UserMetaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,8 +51,14 @@ Route::group([], function() {
 
         Route::group(['prefix' => 'kinks'], function() {
             Route::get('/', [Escorts::class, 'kinks']);
+            Route::put('become-kink', [Escorts::class, 'becomeAkinks']);
             Route::get('{customer_id}', [Escorts::class, 'kink']);
             Route::delete('{customer_id}', [Escorts::class, 'destroy']);
+            
+            // packages
+            Route::post('{escortId}/packages',              [Escorts::class, 'addPackage']);
+            Route::put('{escortId}/packages/{packageId}',   [Escorts::class, 'updatePackage']);
+            Route::delete('{escortId}/packages/{packageId}', [Escorts::class, 'deletePackage']);
         });
 
         Route::group(['prefix' => 'gallery'], function() {
@@ -83,16 +91,37 @@ Route::group([], function() {
             Route::get('count',         [ConnectionController::class, 'getConnectionGroupCount']);
         });
 
+        Route::group(['prefix' => 'token'], function() {
+            Route::post('send',     [TokenController::class, 'send']);
+            Route::post('verify',   [TokenController::class, 'verify']);
+        });
+
+
         Route::group(['prefix' => 'user'], function() {
-            Route::put('profile-image',     [AuthController::class, 'updateProfileImage']);
-            Route::get('get-by-username',   [AuthController::class, 'usernameCheck']);
+            Route::put('profile-image',     	[AuthController::class, 'updateProfileImage']);
+            Route::get('username/{username}',   [AuthController::class, 'usernameCheck']);
             Route::group(['prefix' => 'meta-data'], function() {
-                Route::post('/',                [AuthController::class, 'index']);
-                Route::post('get',              [AuthController::class, 'show']);
-                Route::post('add',              [AuthController::class, 'store']);
-                Route::put('update/{key}',      [AuthController::class, 'update']);
-                Route::delete('delete/{key}',   [AuthController::class, 'destroy']);
+                Route::post('/',                [UserMetaController::class, 'index']);
+                Route::post('get',              [UserMetaController::class, 'show']);
+                Route::post('add',              [UserMetaController::class, 'store']);
+                Route::put('update/{key}',      [UserMetaController::class, 'update']);
+                Route::delete('delete/{key}',   [UserMetaController::class, 'destroy']);
             });
         });
+
     });
+
+    Route::post('verify-images', [MiscController::class, 'verifyImages']);
+});
+
+Route::post('no-login', function() {
+	return get_error_response(['error' => "Unathenticated request"], 401);
+})->name('login');
+
+Route::fallback(function(){
+    try {
+        return get_error_response(['error' => "Page not found"]);
+    } catch (\Throwable $th) {
+        return get_error_response(['error' => $th->getMessage()]);
+    }
 });

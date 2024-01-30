@@ -89,4 +89,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Connection::class);
     }
+    
+    /**
+     * Define the inverse of the 'user' relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function stories()
+    {
+        return $this->hasMany(Stories::class, 'user_id');
+    }
+
+    public function ActivateKink()
+    {
+        $this->update([
+            'is_escort' => true
+        ]);
+    }
 }

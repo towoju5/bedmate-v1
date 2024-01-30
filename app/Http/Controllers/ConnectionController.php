@@ -13,11 +13,14 @@ class ConnectionController extends Controller
     public function createConnection(ConnectionRequestValidationRequest $request)
     {
         try {
+            $request->validate([
+                'booking_id' =>  'required',
+            ]);
             $user = auth()->user();
 
             $connection = Connection::create([
                 'user_id' => $user->id,
-                'connection_id' => $request->connection_id,
+                'connection_id' => $request->booking_id,
                 'status' => 'pending',
             ]);
 
@@ -92,7 +95,7 @@ class ConnectionController extends Controller
             }
 
             return get_error_response(['message' => 'Unauthorized or invalid request'], 403);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {class
             return get_error_response(['error' => $th->getMessage()]);
         }
     }
@@ -102,9 +105,7 @@ class ConnectionController extends Controller
     public function getConnectionGroupCount()
     {
         $user = auth()->user();
-
         $connectionCount = $user->connections()->count();
-
         return response()->json(['message' => 'Connection group count retrieved successfully', 'count' => $connectionCount]);
     }
 }
