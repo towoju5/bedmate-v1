@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\ImageHelper;
 use App\Models\Settings;
 use App\Models\User;
 use App\Models\UserMeta;
@@ -9,29 +8,27 @@ use Illuminate\Support\Facades\Storage;
 use SapientPro\ImageComparatorLaravel\Facades\Comparator;
 use SapientPro\ImageComparator\Strategy\DifferenceHashStrategy;
 
-
-
 if (!function_exists('getUsers')) {
-    /* 
+    /*
      * @param array $options
      *
      */
     function getUsers($userId = null)
     {
         $user = $userId ?? auth()->id();
-        return  User::findorfail($user);
+        return User::findorfail($user);
     }
 }
 
 if (!function_exists('save_image')) {
-    /* 
+    /*
      * @param array $options
      *
      */
     function save_image($image, $path)
     {
         $image_path = '/storage/' . $path;
-        $name =  sha1(auth()->id().time()) . '.' . $image->getClientOriginalExtension();
+        $name = sha1(auth()->id() . time()) . '.' . $image->getClientOriginalExtension();
         $destinationPath = public_path($image_path);
         $image->move($destinationPath, $name);
         $paths = "$image_path/$name";
@@ -40,14 +37,14 @@ if (!function_exists('save_image')) {
 }
 
 if (!function_exists('save_media')) {
-    /* 
+    /*
      * @param array $options
      *
      */
     function save_media($videFile, $path)
     {
         $video = $videFile;
-        $filename = sha1(auth()->id().time()) . '.' . $video->getClientOriginalExtension();
+        $filename = sha1(auth()->id() . time()) . '.' . $video->getClientOriginalExtension();
         // $path = public_path("videos/$path/$filename");
         $storagePath = "videos/$path/resized_$filename";
         // Save the original video
@@ -64,7 +61,7 @@ if (!function_exists('save_media')) {
 }
 
 if (!function_exists('get_commision')) {
-    /* 
+    /*
      * @param array $options
      *
      */
@@ -110,7 +107,7 @@ if (!function_exists('per_page')) {
      *
      * @return Strings
      */
-    function per_page($per_page = 5): string
+    function per_page($per_page = 10): string
     {
         return $per_page;
     }
@@ -142,12 +139,12 @@ if (!function_exists('get_error_response')) {
      * @param string Error message
      * @param array error response
      */
-    function get_error_response($arr, $code = 400)
+    function get_error_response(array $arr, int $code = 400)
     {
         $data = [
             'status' => false,
             'message' => 'Please check your request',
-            'errors' => $arr
+            'errors' => $arr,
         ];
         return response()->json($data, $code);
     }
@@ -160,12 +157,12 @@ if (!function_exists('get_success_response')) {
      * @param string message
      * @param array data response
      */
-    function get_success_response($arr, $statusCode = 200)
+    function get_success_response(array $arr, int $statusCode = 200)
     {
         $data = [
-            'status'    => true,
-            'message'   => 'Request successful',
-            'data'      => $arr
+            'status' => true,
+            'message' => 'Request successful',
+            'data' => $arr,
         ];
         return response()->json($data, $statusCode);
     }
@@ -190,7 +187,7 @@ if (!function_exists('getUserByUsername')) {
     function getUserByUsername($username)
     {
         $user = User::where('username', $username);
-        if($user->count() > 0) {
+        if ($user->count() > 0) {
             return $user->first();
         }
         return false;
@@ -204,16 +201,16 @@ if (!function_exists('getUserByMetaData')) {
     function getUserByMetaData($userId, $key = null, $value = null)
     {
         $where['user_id'] = $userId;
-        if(null != $key)  {
+        if (null != $key) {
             $where['key'] = $key;
         }
 
-        if(null != $value)  {
+        if (null != $value) {
             $where['value'] = $value;
         }
-        
+
         $user = UserMeta::where($where);
-        if($user->count() > 0) {
+        if ($user->count() > 0) {
             return $user->get();
         }
         return false;

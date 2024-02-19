@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('users_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users');
             $table->string('package_name');
             $table->string('package_type');
             $table->string('package_price');
             $table->string('package_duration');
             $table->json('other_package_details');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

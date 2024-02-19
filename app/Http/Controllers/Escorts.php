@@ -22,12 +22,16 @@ class Escorts extends Controller
                     $fee = explode('-', $request->fees);
                     $query->whereBetween('amount', [$fee[0], $fee[1]]);
                 })
+                ->when($request->has('age'), function ($query) use ($request) {
+                    $age = explode('-', $request->age);
+                    $query->whereBetween('amount', [$age[0], $age[1]]);
+                })
                 ->when($request->has('location'), function ($query) use ($request) {
                     // Assuming the request has 'latitude' and 'longitude' keys
                     $user = $request->user();
                     $latitude = $user->latitude;
                     $longitude = $user->longitude;
-                    $radius = $request->location; // The radius in kilometers
+                    $radius = $request->location; 
 
                     $query->selectRaw(
                         '(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
@@ -40,7 +44,7 @@ class Escorts extends Controller
 
             return get_success_response($query);
         } catch (\Throwable $th) {
-            return get_error_response(['error' =>  $th->getMessage()]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
@@ -48,7 +52,7 @@ class Escorts extends Controller
     {
         try {
             $escort = new User();
-            if($escort->ActivateKink()){
+            if ($escort->ActivateKink()) {
                 return get_success_response(['msg' => "User successfully upgraded to escort"]);
             }
         } catch (\Throwable $th) {
@@ -62,65 +66,97 @@ class Escorts extends Controller
             $kink = User::with('messages', 'orders')->find($id);
             return get_success_response($kink);
         } catch (\Throwable $th) {
-            return get_error_response(['error' =>  $th->getMessage()]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
     public function destroy($id)
     {
         try {
-            if ((int)auth()->id() !== (int)$id) {
-                return get_error_response(['error' =>  'You can only delete your own account']);
+            if ((int) auth()->id() !== (int) $id) {
+                return get_error_response(['error' => 'You can only delete your own account']);
             }
-            $record =  User::whereId($id)->first();
-            if ($record->delete())
+            $record = User::whereId($id)->first();
+            if ($record->delete()) {
                 return get_success_response(['message' => 'Record deleted successfully']);
-            return get_error_response(['error' =>  'Unable to delete, please contact support']);
+            }
+
+            return get_error_response(['error' => 'Unable to delete, please contact support']);
         } catch (\Throwable $th) {
-            return get_error_response(['error' =>  $th->getMessage()]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
+    /**
+     * Packages API for kinks
+     */
+
+    public function getPackages($escortId)
+    {
+        try {
+            $escort = User::findOrFail($escortId);
+            if($escort->is_escort == false) {
+                return get_error_response(['error' => "This endpoint is only available for kinks"]);
+            }
+            $package = $escort->packages()->get();
+            return get_success_response($package, 201);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
 
     public function addPackage(Request $request, $escortId)
     {
-        $request->validate([
-            'package_name' => 'required',
-            'package_price' => 'required|numeric',
-            'package_duration_days' => 'required|integer',
-            'package_type' => 'sometimes',
-            'other_package_details' => 'sometimes'      
-        ]);
+        try {
+            $request->validate([
+                'package_name' => 'required',
+                'package_price' => 'required|numeric',
+                'package_duration' => 'required|string',
+                'package_type' => 'sometimes',
+                'other_package_details' => 'sometimes',
+            ]);
 
-        $escort = Escorts::findOrFail($escortId);
-        $package = $escort->packages()->create($request->all());
+            $escort = User::findOrFail($escortId);
+            $package = $escort->packages()->create($request->all());
 
-        return response()->json($package, 201);
+            return get_success_response($package, 201);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     public function updatePackage(Request $request, $escortId, $packageId)
     {
-        $request->validate([
-            'package_name' => 'required',
-            'package_price' => 'required|numeric',
-            'package_duration_days' => 'required|integer',
-            'package_type' => 'sometimes',
-            'other_package_details' => 'sometimes' 
-        ]);
+        try {
+            $request->validate([
+                'package_name' => 'required',
+                'package_price' => 'required|numeric',
+                'package_duration' => 'required|string',
+                'package_type' => 'sometimes',
+                'other_package_details' => 'sometimes',
+            ]);
 
-        $escort = Escorts::findOrFail($escortId);
-        $package = $escort->packages()->findOrFail($packageId);
-        $package->update($request->all());
+            $escort = User::findOrFail($escortId);
+            $package = $escort->packages()->findOrFail($packageId);
+            $package->update($request->all());
 
-        return response()->json($package, 200);
+            return get_success_response($package, 200);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     public function deletePackage($escortId, $packageId)
     {
-        $escort = Escorts::findOrFail($escortId);
-        $package = $escort->packages()->findOrFail($packageId);
-        $package->delete();
+        try {
 
-        return response()->json(null, 204);
+            $escort = User::findOrFail($escortId);
+            $package = $escort->packages()->findOrFail($packageId);
+            $package->delete();
+
+            return get_success_response(null, 204);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 }
