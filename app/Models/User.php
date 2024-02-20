@@ -106,4 +106,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_escort' => true
         ]);
     }
+
+    public function packages()
+    {
+        return $this->hasMany(Packages::class);
+    }
 }

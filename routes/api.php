@@ -56,6 +56,7 @@ Route::group([], function() {
             Route::delete('{customer_id}', [Escorts::class, 'destroy']);
             
             // packages
+            Route::get('{escortId}/packages',  [Escorts::class, 'getPackages']);
             Route::post('{escortId}/packages',              [Escorts::class, 'addPackage']);
             Route::put('{escortId}/packages/{packageId}',   [Escorts::class, 'updatePackage']);
             Route::delete('{escortId}/packages/{packageId}', [Escorts::class, 'deletePackage']);
@@ -117,11 +118,3 @@ Route::group([], function() {
 Route::post('no-login', function() {
 	return get_error_response(['error' => "Unathenticated request"], 401);
 })->name('login');
-
-Route::fallback(function(){
-    try {
-        return get_error_response(['error' => "Page not found"]);
-    } catch (\Throwable $th) {
-        return get_error_response(['error' => $th->getMessage()]);
-    }
-});

@@ -95,7 +95,7 @@ class ConnectionController extends Controller
             }
 
             return get_error_response(['message' => 'Unauthorized or invalid request'], 403);
-        } catch (\Throwable $th) {class
+        } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
     }
