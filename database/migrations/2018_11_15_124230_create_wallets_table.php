@@ -36,6 +36,7 @@ return new class() extends Migration {
             $table->timestamps();
 
             $table->unique(['holder_type', 'holder_id', 'slug']);
+            $table->engine = 'InnoDB';
         });
 
         Schema::table($this->transactionTable(), function (Blueprint $table) {
