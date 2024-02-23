@@ -304,7 +304,7 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            return get_success_response($user);
+            return get_success_response($user->toArray());
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
