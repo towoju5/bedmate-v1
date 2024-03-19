@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Bavix\Wallet\Traits\HasWallet;
+use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\CanPay;
+use Bavix\Wallet\Interfaces\Customer;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, Wallet, Customer
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasWallet, CanPay;
 
     /**
      * The attributes that are mass assignable.
@@ -110,5 +112,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function packages()
     {
         return $this->hasMany(Packages::class);
+    }
+
+    /**
+     * Accessor to retrieve the wallet balance.
+     *
+     * @return float
+     */
+    public function getWalletBalanceAttribute()
+    {
+        return $this->balance;
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\MyExchangeService;
 use Bavix\Wallet\Internal\Assembler\AvailabilityDtoAssembler;
 use Bavix\Wallet\Internal\Assembler\BalanceUpdatedEventAssembler;
 use Bavix\Wallet\Internal\Assembler\ExtraDtoAssembler;
@@ -109,7 +110,7 @@ return [
         'consistency' => ConsistencyService::class,
         'discount' => DiscountService::class,
         'eager_loader' => EagerLoaderService::class,
-        'exchange' => ExchangeService::class,
+        'exchange' => MyExchangeService::class, //ExchangeService::class,
         'prepare' => PrepareService::class,
         'purchase' => PurchaseService::class,
         'tax' => TaxService::class,

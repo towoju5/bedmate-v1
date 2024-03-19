@@ -10,12 +10,15 @@ class WalletController extends Controller
     public function deposit(Request $request)
     {
         try {
-            $request->validate([
-                'amount' => 'required',
-                'currency'=> 'required'
-            ]);
+            $request->validate(
+                [
+                    'amount' => 'required',
+                    'currency'=> 'required'
+                ]
+            );
 
             $validate['user_id'] = auth()->id();
+            
             $api_call = Http::withToken()->post(getenv('DEPOSIT_URL'),  $validate)->json();
 
             // return $api_call
