@@ -9,6 +9,7 @@ use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\StoriesController;
 use App\Http\Controllers\TokenController;
+use App\Http\Controllers\WalletController;
 use App\Http\Controllers\UserMetaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,12 @@ Route::group([], function() {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-verification-email', [AuthController::class, 'resend_verification_email']);
+
+    Route::group(['prefix' => 'token'], function() {
+        Route::post('send',     [TokenController::class, 'send']);
+        Route::post('verify',   [TokenController::class, 'verify']);
+    });
+
 
     Route::group(['middleware' => 'auth:sanctum'], function() {
         // verify customer transactio PIN
@@ -92,9 +99,9 @@ Route::group([], function() {
             Route::get('count',         [ConnectionController::class, 'getConnectionGroupCount']);
         });
 
-        Route::group(['prefix' => 'token'], function() {
-            Route::post('send',     [TokenController::class, 'send']);
-            Route::post('verify',   [TokenController::class, 'verify']);
+        Route::group(['prefix' => 'wallet'], function() {
+            Route::get('balance',     [WalletController::class, 'balance']);
+            Route::post('exchange',   [WalletController::class, 'exchange']);
         });
 
 

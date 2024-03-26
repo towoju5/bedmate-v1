@@ -185,9 +185,13 @@ return [
         'model' => Wallet::class,
         'creating' => [],
         'default' => [
-            'name' => 'Default Wallet',
-            'slug' => 'default',
-            'meta' => [],
+            'name' => 'US Dollars',
+            'slug' => 'usd',
+            'meta' => [
+                "icon" => "$",
+                "type" => "fiat",
+                "precision" => 2
+            ],
         ],
     ],
 ];

@@ -26,18 +26,19 @@ class TokenController extends Controller
     public function send(Request $request)
     {
         try {
-            $user = User::where('email', auth()->user()->email)->first();
+            $email = auth()->user()->email ?? $request->email;
+            $user = User::where('email', $email)->first();
           
             if($user) {
                 $token = strtoupper(Str::random(6));
-                ResetToken::where('email', $request->email)->delete();
+                ResetToken::where('email', $email)->delete();
 
                 ResetToken::create([
-                    'email' => $request->email,
+                    'email' => $email,
                     'token' => $token
                 ]);
 
-                Mail::to($request->email)->send(new OtpVerificationMail($token, $user->username));
+                Mail::to($email)->send(new OtpVerificationMail($token, $user->username));
 
                 return get_success_response(['msg' => 'Please check your email for your reset token']);
             }

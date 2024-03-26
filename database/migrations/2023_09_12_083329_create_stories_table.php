@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->enum('type', ['text', 'image'])->default('text');
-            $table->string('images');
+            $table->string('images')->nullable();
             $table->boolean('is_flagged')->default(false);
             $table->boolean('is_liked')->default(false);
             $table->string('content', 255)->nullable();

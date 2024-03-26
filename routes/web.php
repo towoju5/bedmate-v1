@@ -43,3 +43,9 @@ Route::get('sample', function () {
         ]);
     }
 });
+
+Route::fallback(function () {
+    return get_error_response([
+        'error' => 'Page Not Found. If error persists, contact support'
+    ], 404);
+});
