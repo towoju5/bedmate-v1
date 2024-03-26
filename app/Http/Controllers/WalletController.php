@@ -9,7 +9,7 @@ class WalletController extends Controller
 {
     public $currencies;
 
-    public fuunction __construct()
+    public function __construct()
     {
         $this->currencies = ["USD", "NGN"];
     }
