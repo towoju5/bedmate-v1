@@ -9,7 +9,7 @@ class WalletController extends Controller
 {
     public $currencies;
 
-    public fuunction __construct()
+    public function __construct()
     {
         $this->currencies = ["USD", "NGN"];
     }
@@ -30,14 +30,14 @@ class WalletController extends Controller
             }
             return get_success_response($balance);
         } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
     /**
      * Convert currency from one wallet balance to another
      */
-    public function exchange_currency(Request $request)
+    public function exchange(Request $request)
     {
         try {
             $validate = $request->validate([
@@ -68,7 +68,7 @@ class WalletController extends Controller
 
             return get_success_response($balance);
         } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
