@@ -100,8 +100,9 @@ Route::group([], function() {
         });
 
         Route::group(['prefix' => 'wallet'], function() {
-            Route::get('balance',     [WalletController::class, 'balance']);
-            Route::post('exchange',   [WalletController::class, 'exchange']);
+            Route::get('balance',       [WalletController::class, 'balance']);
+            Route::post('exchange',     [WalletController::class, 'exchange']);
+            Route::post('add-wallet',   [WalletController::class, 'addWallet']);
         });
 
 

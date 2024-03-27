@@ -67,7 +67,7 @@ class StoriesController extends Controller
             endif;
             $stories->save();
 
-            return get_success_response($stories);
+            return get_success_response(to_array($stories));
         } catch (\Throwable $th) {
             return get_error_response(['error' =>  $th->getMessage()]);
         }

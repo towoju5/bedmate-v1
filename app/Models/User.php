@@ -10,12 +10,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Bavix\Wallet\Traits\HasWallet;
 use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\HasWallets;
 use Bavix\Wallet\Traits\CanPay;
 use Bavix\Wallet\Interfaces\Customer;
 
 class User extends Authenticatable implements MustVerifyEmail, Wallet, Customer
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasWallet, CanPay;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasWallet, HasWallets, CanPay;
 
     /**
      * The attributes that are mass assignable.
