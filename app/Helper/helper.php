@@ -168,17 +168,6 @@ if (!function_exists('get_success_response')) {
     }
 }
 
-if (!function_exists('compare_image')) {
-    /**
-     * Compare the similarity between 2 different images
-     */
-    function compare_image($image1, $image2)
-    {
-        Comparator::setHashStrategy(new DifferenceHashStrategy());
-        $similarity = Comparator::compare($image1, $image2);
-        return $similarity;
-    }
-}
 
 if (!function_exists('getUserByUsername')) {
     /**
@@ -214,5 +203,44 @@ if (!function_exists('getUserByMetaData')) {
             return $user->get();
         }
         return false;
+    }
+}
+
+if (!function_exists('compare_image')) {
+    /**
+     * Compare the similarity between 2 different images
+     */
+    function compare_image($image1, $image2)
+    {
+        $faceid = [];
+        $images = array($image1, $image2);
+        $faceAPIName = getenv("AZURE_FACE_API_NAME");
+        $apikey = getenv("AZURE_FACE_API");
+        $faceidAPIHost = "https://$faceAPIName.cognitiveservices.azure.com";
+        foreach ($images as $data) {
+            $detect = array('url' => $data);
+            $result = do_post("$faceidAPIHost/face/v1.0/detect?recognitionModel=recognition_04&detectionModel=detection_03", json_encode($detect), $apikey);
+            array_push($faceid, $result[0]['faceId']);
+        }
+        $request_url = "$faceidAPIHost/face/v1.0/verify";
+        $match = array("faceId1" => $faceid[0], "faceId2" => $faceid[1], "maxNumOfCandidatesReturned" => 10, "mode" => "matchFace");
+        return do_post($request_url, json_encode($match), $apikey);
+    }
+}
+
+if(!function_exists("do_post")) {
+    /**
+     * Make a post request to Azure server
+     */
+    function do_post($url, $params, $key) {
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/json\r\nOcp-Apim-Subscription-Key: $key",
+                'method'  => 'POST',
+                'content' => $params
+            )
+        );
+        $result = file_get_contents($url, false, stream_context_create($options));        
+        return json_decode($result, true);
     }
 }
